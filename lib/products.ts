@@ -10,6 +10,7 @@ export type Product = {
   description: string[];
   bullets: string[];
   format: string;
+  downloadFile: string;
 };
 
 // Add more products to this array as your catalog grows — every page
@@ -19,6 +20,7 @@ export const products: Product[] = [
     id: 'one-person-ai-agency',
     slug: 'the-one-person-ai-agency',
     name: 'The One-Person AI Agency',
+    downloadFile: '/downloads/the-one-person-ai-agency.pdf',
     tagline:
       'A complete blueprint for using Claude Code to land clients, deliver AI-powered websites and automation systems, and build a profitable service business — by yourself.',
     price: 1800,
@@ -37,6 +39,7 @@ export const products: Product[] = [
       'Exact build patterns for websites, automations, and full AI systems',
       'A 25-chapter, 85-page action-ready playbook — instant PDF download',
     ],
+    
   },
 ];
 
