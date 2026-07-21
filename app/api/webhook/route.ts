@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
-
+import { sendOrderConfirmationEmail } from '@/lib/email';
+import { getProductBySlug } from '@/lib/products';
+import { getSiteUrl } from '@/lib/stripe';
 // Stripe needs the exact raw request body (untouched by any JSON parsing)
 // to verify the webhook signature, which is why we read it with `.text()`
 // rather than `.json()`. The App Router's Route Handlers give us the raw
@@ -38,27 +40,25 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.Checkout.Session;
+  const session = event.data.object as Stripe.Checkout.Session;
+  const items = session.metadata?.items ? JSON.parse(session.metadata.items) : [];
+  const email = session.customer_details?.email;
 
-      // This is the authoritative, server-side confirmation that payment
-      // succeeded — safe to trust, unlike the client-side redirect to
-      // /success (which a user could reach without actually paying).
-      const items = session.metadata?.items
-        ? JSON.parse(session.metadata.items)
-        : [];
+  console.log('[webhook] Payment completed for session', session.id, { email, items });
 
-      console.log('[webhook] Payment completed for session', session.id, {
-        customerEmail: session.customer_details?.email,
-        amountTotal: session.amount_total,
-        items,
+  if (email) {
+    for (const item of items as { slug: string }[]) {
+      const product = getProductBySlug(item.slug);
+      if (!product) continue;
+      await sendOrderConfirmationEmail({
+        to: email,
+        productName: product.name,
+        downloadUrl: `${getSiteUrl()}${product.downloadFile}`,
       });
-
-      // 🔧 Extend here once you're ready:
-      //   - send an order confirmation email (e.g. with Resend or SendGrid)
-      //   - record the order / decrement inventory in a database
-      //   - grant access to the downloadable file, if you gate it
-      break;
     }
+  }
+  break;
+}
 
     case 'checkout.session.async_payment_failed': {
       const session = event.data.object as Stripe.Checkout.Session;
