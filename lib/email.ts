@@ -1,6 +1,14 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+
+if (!resendApiKey) {
+  console.warn(
+    '[email] RESEND_API_KEY is not set — order confirmation emails will be skipped until it is.'
+  );
+}
+
+const resend = new Resend(resendApiKey || 're_placeholder');
 
 export async function sendOrderConfirmationEmail({
   to,
@@ -11,7 +19,7 @@ export async function sendOrderConfirmationEmail({
   productName: string;
   downloadUrl: string;
 }) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!resendApiKey) {
     console.warn('[email] RESEND_API_KEY not set — skipping confirmation email.');
     return;
   }
