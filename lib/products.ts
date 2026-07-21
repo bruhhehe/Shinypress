@@ -21,7 +21,7 @@ export const products: Product[] = [
     name: 'The One-Person AI Agency',
     tagline:
       'A complete blueprint for using Claude Code to land clients, deliver AI-powered websites and automation systems, and build a profitable service business — by yourself.',
-    price: 2900,
+    price: 1800,
     currency: 'usd',
     images: ['/images/ebook-cover.jpg'],
     format: 'Digital PDF · 85 pages · instant download',
